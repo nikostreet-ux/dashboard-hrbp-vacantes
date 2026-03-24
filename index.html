@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vacantes HRBP | Mallplaza</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <header>
+            <div class="logo-container">
+                <div class="logo-icon">M</div>
+                <h1>Dashboard Vacantes HRBP</h1>
+            </div>
+            <div id="current-date" style="font-size: 0.875rem; color: var(--secondary); font-weight: 500;"></div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Vacantes</div>
+                <div class="stat-value" id="total-vacancies">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">En Proceso</div>
+                <div class="stat-value" id="active-vacancies">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Cerradas (Mes)</div>
+                <div class="stat-value" id="closed-vacancies">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Promedio de Cierre</div>
+                <div class="stat-value">18 días</div>
+            </div>
+        </section>
+
+        <section class="filters-container">
+            <div class="filter-group">
+                <label for="filter-dept">Departamento</label>
+                <select id="filter-dept">
+                    <option value="all">Todos</option>
+                    <option value="Technology">Tecnología</option>
+                    <option value="Product">Producto</option>
+                    <option value="Analytics">Analytics</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Human Resources">Recursos Humanos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-hrbp">HRBP</label>
+                <select id="filter-hrbp">
+                    <option value="all">Todos</option>
+                    <option value="Camila Rojas">Camila Rojas</option>
+                    <option value="Andrés Silva">Andrés Silva</option>
+                    <option value="Marianela Gómez">Marianela Gómez</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-status">Estado</label>
+                <select id="filter-status">
+                    <option value="all">Todos</option>
+                    <option value="Open">Abierta</option>
+                    <option value="In Progress">En Proceso</option>
+                    <option value="Closed">Cerrada</option>
+                </select>
+            </div>
+            <div class="filter-group" style="flex-grow: 1;">
+                <label for="search-input">Buscar Cargo</label>
+                <input type="text" id="search-input" placeholder="Ej: Senior Engineer...">
+            </div>
+        </section>
+
+        <section class="table-container">
+            <table id="vacancies-table">
+                <thead>
+                    <tr>
+                        <th data-sort="role">Cargo</th>
+                        <th data-sort="department">Departamento</th>
+                        <th data-sort="hrbp">HRBP</th>
+                        <th data-sort="postedDate">Fecha Postulación</th>
+                        <th data-sort="applicants">Candidatos</th>
+                        <th data-sort="priority">Prioridad</th>
+                        <th data-sort="status">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Dynamic content -->
+                </tbody>
+            </table>
+        </section>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
