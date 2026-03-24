@@ -6,11 +6,11 @@ const CONFIG = {
   colors: {
     activa: '#00c9a7',
     cerrada: '#0d97ff',
-    cancelada: '#f85149',
-    standby: '#a371f7',
-    ttf: '#f7a325',
-    text: '#e6edf3',
-    muted: '#7d8590'
+    cancelada: '#ef4444',
+    standby: '#8b5cf6',
+    ttf: '#f59e0b',
+    text: '#0f172a',
+    muted: '#64748b'
   }
 };
 
@@ -143,9 +143,9 @@ function initEventListeners() {
 function applyFilters() {
   state.filteredData = state.data.filter(v => {
     const matchesSearch = !state.filters.search || 
-      v.Cargo.toLowerCase().includes(state.filters.search.toLowerCase()) ||
-      v.Gerencia.toLowerCase().includes(state.filters.search.toLowerCase()) ||
-      v.HRBP.toLowerCase().includes(state.filters.search.toLowerCase());
+      (v.Cargo && v.Cargo.toLowerCase().includes(state.filters.search.toLowerCase())) ||
+      (v.Gerencia && v.Gerencia.toLowerCase().includes(state.filters.search.toLowerCase())) ||
+      (v.HRBP && v.HRBP.toLowerCase().includes(state.filters.search.toLowerCase()));
     
     const matchesHrbp = !state.filters.hrbp || v.HRBP === state.filters.hrbp;
     const matchesPais = !state.filters.pais || v.País === state.filters.pais;
@@ -169,7 +169,7 @@ function applyFilters() {
     let valB = b[state.sortBy];
     
     // Handle dates
-    if (state.sortBy.includes('Fecha')) {
+    if (state.sortBy && state.sortBy.includes('Fecha')) {
       valA = new Date(valA || 0);
       valB = new Date(valB || 0);
     }
@@ -193,7 +193,7 @@ function renderKPIs() {
   const totals = {
     activa: state.filteredData.filter(v => v.Estado === 'Activa').length,
     cerrada: state.filteredData.filter(v => v.Estado === 'Cerrada').length,
-    cancelada: state.filteredData.filter(v => v.Estado === 'Cancelada').length,
+    cancelada: state.filteredData.filter(v => v.Estado === 'Cancelada' || v.Estado === 'Cancelada ').length,
     standby: state.filteredData.filter(v => v.Estado === 'Stand By').length,
   };
 
@@ -202,11 +202,22 @@ function renderKPIs() {
     .map(v => v.TTF);
   const avgTTF = ttfValues.length ? Math.round(ttfValues.reduce((a, b) => a + b, 0) / ttfValues.length) : 0;
 
+  const forecast = {
+    si: state.filteredData.filter(v => v.Forecast === 'Si').length,
+    no: state.filteredData.filter(v => v.Forecast === 'No').length,
+    pdte: state.filteredData.filter(v => v.Forecast === 'Pendiente' || !v.Forecast).length
+  };
+
   animateValue('kpi-activa', totals.activa);
   animateValue('kpi-cerrada', totals.cerrada);
   animateValue('kpi-cancelada', totals.cancelada);
   animateValue('kpi-standby', totals.standby);
   animateValue('kpi-ttf', avgTTF);
+
+  const forecastEl = document.getElementById('kpi-forecast');
+  if (forecastEl) {
+    forecastEl.innerHTML = `<span style="color:var(--success)">${forecast.si}</span> <small style="color:var(--text-dim); font-weight:400; font-size:12px;">Si</small> / <span style="color:var(--danger)">${forecast.no}</span> <small style="color:var(--text-dim); font-weight:400; font-size:12px;">No</small> / <span style="color:var(--text-muted)">${forecast.pdte}</span> <small style="color:var(--text-dim); font-weight:400; font-size:12px;">Pdte</small>`;
+  }
 
   document.getElementById('kpi-activa-sub').textContent = `${((totals.activa / (state.filteredData.length || 1)) * 100).toFixed(1)}% del total`;
   document.getElementById('kpi-cerrada-sub').textContent = `${((totals.cerrada / (state.filteredData.length || 1)) * 100).toFixed(1)}% del total`;
@@ -248,7 +259,7 @@ function renderCharts() {
     datasets: [
       { label: 'Activas', data: hrbpLabels.map(l => hrbpGroups[l].Activa), backgroundColor: CONFIG.colors.activa },
       { label: 'Cerradas', data: hrbpLabels.map(l => hrbpGroups[l].Cerrada), backgroundColor: CONFIG.colors.cerrada },
-      { label: 'Otras', data: hrbpLabels.map(l => hrbpGroups[l].Otr), backgroundColor: CONFIG.colors.muted }
+      { label: 'Otras', data: hrbpLabels.map(l => hrbpGroups[l].Otr), backgroundColor: '#cbd5e1' }
     ]
   }, { indexAxis: 'y', scales: { x: { stacked: true, grid: { color: '#f1f5f9' } }, y: { stacked: true, grid: { display: false } } } });
 
@@ -256,27 +267,32 @@ function renderCharts() {
   const paisGroups = countBy(state.filteredData, 'País');
   updateChart('Pais', 'doughnut', {
     labels: Object.keys(paisGroups),
-    datasets: [{ data: Object.values(paisGroups), backgroundColor: [CONFIG.colors.accent2, CONFIG.colors.standby, CONFIG.colors.accent] }]
+    datasets: [{ 
+      data: Object.values(paisGroups), 
+      backgroundColor: ['#0d97ff', '#7c3aed', '#00c9a7', '#f59e0b', '#ef4444'] 
+    }]
   }, { cutout: '70%', plugins: { legend: { display: true, position: 'right' } } });
 
   // Chart Motivo
   const motivoGroups = countBy(state.filteredData, 'Motivo de Busqueda');
   updateChart('Motivo', 'pie', {
     labels: Object.keys(motivoGroups),
-    datasets: [{ data: Object.values(motivoGroups), backgroundColor: [CONFIG.colors.activa, CONFIG.colors.standby] }]
+    datasets: [{ 
+      data: Object.values(motivoGroups), 
+      backgroundColor: ['#00c9a7', '#8b5cf6', '#3b82f6', '#f59e0b'] 
+    }]
   }, { plugins: { legend: { display: true, position: 'right' } } });
 
-  // Chart Familia
-  const famGroups = countBy(state.filteredData, 'Familia de cargo');
+  // Chart Familia (ONLY ACTIVE)
+  const activeVacancies = state.filteredData.filter(v => v.Estado === 'Activa');
+  const famGroups = countBy(activeVacancies, 'Familia de cargo');
   const sortedFam = Object.entries(famGroups).sort((a,b) => b[1] - a[1]);
   updateChart('Familia', 'bar', {
     labels: sortedFam.map(i => i[0]),
     datasets: [{ 
-      label: 'Vacantes',
+      label: 'Vacantes Activas',
       data: sortedFam.map(i => i[1]), 
-      backgroundColor: [
-        '#00c9a7', '#0d97ff', '#f7a325', '#a371f7', '#f85149', '#7d8590'
-      ]
+      backgroundColor: '#0d97ff'
     }]
   }, { 
     indexAxis: 'y', 
