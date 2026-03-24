@@ -11,6 +11,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const closedVacanciesEl = document.getElementById('closed-vacancies');
     const currentDateEl = document.getElementById('current-date');
 
+    // Populate filters dynamically
+    function populateFilters() {
+        const depts = [...new Set(vacanciesData.map(v => v.department))].sort();
+        const hrbps = [...new Set(vacanciesData.map(v => v.hrbp))].sort();
+        
+        filterDept.innerHTML = '<option value="all">Todos</option>' + 
+            depts.map(d => `<option value="${d}">${d}</option>`).join('');
+            
+        filterHRBP.innerHTML = '<option value="all">Todos</option>' + 
+            hrbps.map(h => `<option value="${h}">${h}</option>`).join('');
+    }
+
     let currentData = [...vacanciesData];
     let sortConfig = { key: null, direction: 'asc' };
 
@@ -34,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${new Date(item.postedDate).toLocaleDateString('es-ES')}</td>
                 <td style="text-align: center;">${item.applicants}</td>
                 <td><span class="priority-${item.priority.toLowerCase()}">${item.priority}</span></td>
-                <td><span class="status-badge status-${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span></td>
+                <td><span class="status-badge status-${item.status.toLowerCase().replace(/\s+/g, '-')}">${item.status}</span></td>
             `;
             tableBody.appendChild(row);
         });
@@ -110,5 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initial render
+    populateFilters();
     renderTable(currentData);
 });

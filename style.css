@@ -208,10 +208,28 @@ tr:hover td {
 .status-open { background: #d1fae5; color: #065f46; }
 .status-in-progress { background: #fef3c7; color: #92400e; }
 .status-closed { background: #f1f5f9; color: #475569; }
+.status-cancelada { background: #fee2e2; color: #991b1b; }
+.status-stand-by { background: #e0f2fe; color: #075985; }
 
 .priority-high { color: var(--danger); font-weight: 600; }
 .priority-medium { color: var(--warning); font-weight: 600; }
 .priority-low { color: var(--secondary); font-weight: 600; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
 
 /* Responsive */
 @media (max-width: 768px) {
