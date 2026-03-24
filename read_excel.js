@@ -14,21 +14,24 @@ try {
     const sheet = workbook.Sheets['Detalle Vacantes'];
     const rawData = XLSX.utils.sheet_to_json(sheet);
 
-    const mappedData = rawData.map((item, index) => {
-        let status = item['Estado'] || 'Open';
-        if (status === 'Activa') status = 'Open';
-        else if (status === 'Cerrada') status = 'Closed';
-
+    const mappedData = rawData.map((item) => {
         return {
-            id: `VAC-${String(index + 1).padStart(3, '0')}`,
-            role: item['Cargo'] || 'Sin Cargo',
-            department: item['Gerencia'] || 'Sin Departamento',
-            hrbp: item['HRBP'] || 'Sin HRBP',
-            location: item['País'] || 'Desconocido',
-            postedDate: excelDateToJS(item['Fecha Inicio Búsqueda']),
-            status: status,
-            priority: 'Medium', // Default
-            applicants: 0 // Default
+            "HRBP": item["HRBP"] || "",
+            "País": item["País"] || "",
+            "Coordinador TA Responsable": item["Coordinador TA Responsable"] || "",
+            "Equipo TA": item["Equipo TA"] || "",
+            "Gerencia": item["Gerencia"] || "",
+            "Motivo de Busqueda": item["Motivo de Busqueda"] || "",
+            "Líder": item["Líder"] || "",
+            "Cargo": item["Cargo"] || "",
+            "Familia de cargo": item["Familia de cargo"] || "",
+            "¿A quién reemplaza?": item["¿A quién reemplaza?"] || "",
+            "Estado": item["Estado"] || "",
+            "TTF": item["TTF"] || 0,
+            "Comentarios": item["Comentarios"] || "",
+            "Fecha Inicio Búsqueda": excelDateToJS(item["Fecha Inicio Búsqueda"]),
+            "Fecha Cubierta Búsqueda": excelDateToJS(item["Fecha Cubierta Búsqueda"]),
+            "Forecast": item["Forecast"] || ""
         };
     });
 

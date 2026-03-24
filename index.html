@@ -3,90 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vacantes HRBP | Mallplaza</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Dashboard Vacantes · Mall Plaza</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="dashboard-container">
-        <header>
-            <div class="logo-container">
-                <div class="logo-icon">M</div>
-                <h1>Dashboard Vacantes HRBP</h1>
-            </div>
-            <div id="current-date" style="font-size: 0.875rem; color: var(--secondary); font-weight: 500;"></div>
-        </header>
 
-        <section class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Vacantes</div>
-                <div class="stat-value" id="total-vacancies">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">En Proceso</div>
-                <div class="stat-value" id="active-vacancies">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Cerradas (Mes)</div>
-                <div class="stat-value" id="closed-vacancies">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Promedio de Cierre</div>
-                <div class="stat-value">18 días</div>
-            </div>
-        </section>
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-mark">MP</div>
+    <span>Mall Plaza</span>
+    <small>· Dashboard Vacantes 2026</small>
+  </div>
+  <div class="header-right">
+    <div class="badge-live"><span class="dot-live"></span>En vivo</div>
+    <span id="last-update">Actualizado: ...</span>
+  </div>
+</header>
 
-        <section class="filters-container">
-            <div class="filter-group">
-                <label for="filter-dept">Departamento</label>
-                <select id="filter-dept">
-                    <option value="all">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-hrbp">HRBP</label>
-                <select id="filter-hrbp">
-                    <option value="all">Todos</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="filter-status">Estado</label>
-                <select id="filter-status">
-                    <option value="all">Todos</option>
-                    <option value="Open">Abierta</option>
-                    <option value="Closed">Cerrada</option>
-                    <option value="Cancelada">Cancelada</option>
-                    <option value="Stand By">Stand By</option>
-                </select>
-            </div>
-            <div class="filter-group" style="flex-grow: 1;">
-                <label for="search-input">Buscar Cargo</label>
-                <input type="text" id="search-input" placeholder="Ej: Senior Engineer...">
-            </div>
-        </section>
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <h4>🔍 Filtros</h4>
+      <div class="filter-group">
+        <div class="search-input">
+          <input type="text" id="search" placeholder="Buscar cargo, gerencia…">
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>HRBP</label>
+        <select id="f-hrbp">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>País</label>
+        <select id="f-pais">
+          <option value="">Todos</option>
+          <option>Chile</option>
+          <option>Perú</option>
+          <option>Colombia</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Estado</label>
+        <select id="f-estado">
+          <option value="">Todos</option>
+          <option>Activa</option>
+          <option>Cerrada</option>
+          <option>Cancelada</option>
+          <option>Stand By</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Motivo de Búsqueda</label>
+        <select id="f-motivo">
+          <option value="">Todos</option>
+          <option>Reemplazo</option>
+          <option>Nuevo HC</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Familia de Cargo</label>
+        <select id="f-familia">
+          <option value="">Todas</option>
+          <option>Top Management</option>
+          <option>Middle Management</option>
+          <option>Junior Management</option>
+          <option>Especialista/Profesional</option>
+          <option>Administrativo</option>
+          <option>Tecnico/Vendedor</option>
+          <option>Practicante</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Equipo TA</label>
+        <select id="f-equipo">
+          <option value="">Todos</option>
+          <option>OVH</option>
+          <option>Ejecutivo</option>
+          <option>Operaciones</option>
+        </select>
+      </div>
+      <button class="btn btn-ghost" id="btn-reset">✕ Limpiar filtros</button>
+    </div>
+    <div class="sidebar-section">
+      <h4>📌 Filtros activos</h4>
+      <div id="active-filters"></div>
+      <span id="filter-count"></span>
+    </div>
+    <div style="margin-top: auto;">
+      <button class="btn btn-primary" id="btn-new-vacante">+ Nueva Vacante</button>
+    </div>
+  </aside>
 
-        <section class="table-container">
-            <table id="vacancies-table">
-                <thead>
-                    <tr>
-                        <th data-sort="role">Cargo</th>
-                        <th data-sort="department">Departamento</th>
-                        <th data-sort="hrbp">HRBP</th>
-                        <th data-sort="postedDate">Fecha Postulación</th>
-                        <th data-sort="applicants">Candidatos</th>
-                        <th data-sort="priority">Prioridad</th>
-                        <th data-sort="status">Estado</th>
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Dynamic content -->
-                </tbody>
-            </table>
-        </section>
+  <!-- MAIN -->
+  <main class="main">
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi-card activa">
+        <div class="kpi-label">Vacantes Activas</div>
+        <div class="kpi-value activa" id="kpi-activa">—</div>
+        <div class="kpi-sub" id="kpi-activa-sub"></div>
+      </div>
+      <div class="kpi-card cerrada">
+        <div class="kpi-label">Cerradas</div>
+        <div class="kpi-value cerrada" id="kpi-cerrada">—</div>
+        <div class="kpi-sub" id="kpi-cerrada-sub"></div>
+      </div>
+      <div class="kpi-card cancelada">
+        <div class="kpi-label">Canceladas</div>
+        <div class="kpi-value cancelada" id="kpi-cancelada">—</div>
+        <div class="kpi-sub"></div>
+      </div>
+      <div class="kpi-card standby">
+        <div class="kpi-label">Stand By</div>
+        <div class="kpi-value standby" id="kpi-standby">—</div>
+        <div class="kpi-sub"></div>
+      </div>
+      <div class="kpi-card ttf">
+        <div class="kpi-label">TTF Promedio (días)</div>
+        <div class="kpi-value ttf" id="kpi-ttf">—</div>
+        <div class="kpi-sub" id="kpi-ttf-sub">Solo vacantes activas</div>
+      </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="chart-card wide">
+        <div class="chart-title">Vacantes por HRBP</div>
+        <div class="chart-sub">Distribución por estado y responsable</div>
+        <div class="chart-canvas-wrap"><canvas id="chartHRBP"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Por País</div>
+        <div class="chart-sub">Total de vacantes</div>
+        <div class="chart-canvas-wrap"><canvas id="chartPais"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Motivo de Búsqueda</div>
+        <div class="chart-sub">Reemplazo vs Nuevo HC</div>
+        <div class="chart-canvas-wrap"><canvas id="chartMotivo"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Familia de Cargo</div>
+        <div class="chart-sub">Niveles de jerarquía</div>
+        <div class="chart-canvas-wrap"><canvas id="chartFamilia"></canvas></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-header">
+      <div>
+        <div class="table-title">Detalle de Vacantes</div>
+      </div>
+      <div class="table-actions">
+        <div class="tabs" id="view-tabs">
+          <button class="tab active" data-tab="all">Todas</button>
+          <button class="tab" data-tab="activa">Activas</button>
+          <button class="tab" data-tab="cerrada">Cerradas</button>
+        </div>
+        <button class="btn-export" id="btn-export">⬇ CSV</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table id="main-table">
+          <thead>
+            <tr>
+              <th data-sort="HRBP">HRBP <span class="sort-icon">↕</span></th>
+              <th data-sort="País">País <span class="sort-icon">↕</span></th>
+              <th data-sort="Cargo">Cargo <span class="sort-icon">↕</span></th>
+              <th data-sort="Gerencia">Gerencia <span class="sort-icon">↕</span></th>
+              <th data-sort="Estado">Estado <span class="sort-icon">↕</span></th>
+              <th data-sort="Motivo de Busqueda">Motivo <span class="sort-icon">↕</span></th>
+              <th data-sort="Familia de cargo">Familia <span class="sort-icon">↕</span></th>
+              <th data-sort="TTF">TTF <span class="sort-icon">↕</span></th>
+              <th data-sort="Fecha Inicio Búsqueda">Inicio <span class="sort-icon">↕</span></th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <span class="page-info" id="page-info"></span>
+        <div class="page-controls" id="page-controls"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL NUEVA VACANTE -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">+ Nueva Vacante</h3>
+      <button class="modal-close" id="btn-close-modal">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>HRBP *</label>
+          <select id="m-hrbp">
+            <option value="">Seleccionar…</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>País *</label>
+          <select id="m-pais">
+            <option value="">Seleccionar…</option>
+            <option>Chile</option>
+            <option>Perú</option>
+            <option>Colombia</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Cargo *</label>
+          <input type="text" id="m-cargo" placeholder="Ej: Analista de Marketing">
+        </div>
+        <div class="form-group full">
+          <label>Gerencia</label>
+          <input type="text" id="m-gerencia" placeholder="Ej: Gerencia Comercial Chile">
+        </div>
+        <div class="form-group">
+          <label>Líder</label>
+          <input type="text" id="m-lider" placeholder="Nombre del líder">
+        </div>
+        <div class="form-group">
+          <label>Coordinador TA</label>
+          <input type="text" id="m-coord" placeholder="Responsable TA">
+        </div>
+        <div class="form-group">
+          <label>Estado *</label>
+          <select id="m-estado">
+            <option value="">Seleccionar…</option>
+            <option>Activa</option>
+            <option>Cerrada</option>
+            <option>Cancelada</option>
+            <option>Stand By</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Motivo</label>
+          <select id="m-motivo">
+            <option value="">Seleccionar…</option>
+            <option>Reemplazo</option>
+            <option>Nuevo HC</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Familia de Cargo</label>
+          <select id="m-familia">
+            <option value="">Seleccionar…</option>
+            <option>Top Management</option>
+            <option>Middle Management</option>
+            <option>Junior Management</option>
+            <option>Especialista/Profesional</option>
+            <option>Administrativo</option>
+            <option>Tecnico/Vendedor</option>
+            <option>Practicante</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Equipo TA</label>
+          <select id="m-equipo">
+            <option value="">Seleccionar…</option>
+            <option>OVH</option>
+            <option>Ejecutivo</option>
+            <option>Operaciones</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha Inicio Búsqueda</label>
+          <input type="date" id="m-fecha">
+        </div>
+        <div class="form-group">
+          <label>TTF (días)</label>
+          <input type="number" id="m-ttf" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label>¿A quién reemplaza?</label>
+          <input type="text" id="m-reemplaza" placeholder="">
+        </div>
+        <div class="form-group">
+          <label>Forecast</label>
+          <select id="m-forecast">
+            <option value="">Seleccionar…</option>
+            <option>Si</option>
+            <option>No</option>
+            <option>Pendiente</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Comentarios</label>
+          <textarea id="m-comentarios" placeholder="Novedades, estado del proceso…"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-small" id="btn-cancel-modal">Cancelar</button>
+        <button class="btn btn-primary btn-small" id="btn-save-vacante">Guardar Vacante</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-panel">
+  <div class="detail-header">
+    <h3 id="detail-title">—</h3>
+    <button class="modal-close" id="btn-close-detail">×</button>
+  </div>
+  <div id="detail-content"></div>
+</div>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>

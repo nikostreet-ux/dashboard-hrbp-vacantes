@@ -4,6 +4,7 @@
   "description": "",
   "main": "data.js",
   "scripts": {
+    "dev": "npx serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
