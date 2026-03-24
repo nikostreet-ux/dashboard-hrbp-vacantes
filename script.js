@@ -235,60 +235,72 @@ function renderCharts() {
   // Chart HRBP (Stacked Bar)
   const hrbpGroups = {};
   state.filteredData.forEach(v => {
-    if (!hrbpGroups[v.HRBP]) hrbpGroups[v.HRBP] = { Activa: 0, Cerrada: 0, Otr: 0 };
-    if (v.Estado === 'Activa') hrbpGroups[v.HRBP].Activa++;
-    else if (v.Estado === 'Cerrada') hrbpGroups[v.HRBP].Cerrada++;
-    else hrbpGroups[v.HRBP].Otr++;
+    const key = v.HRBP || 'Sin HRBP';
+    if (!hrbpGroups[key]) hrbpGroups[key] = { Activa: 0, Cerrada: 0, Otr: 0 };
+    if (v.Estado === 'Activa') hrbpGroups[key].Activa++;
+    else if (v.Estado === 'Cerrada') hrbpGroups[key].Cerrada++;
+    else hrbpGroups[key].Otr++;
   });
 
   const hrbpLabels = Object.keys(hrbpGroups);
-  updateChart('hrbp', 'bar', {
+  updateChart('Hrbp', 'bar', {
     labels: hrbpLabels,
     datasets: [
       { label: 'Activas', data: hrbpLabels.map(l => hrbpGroups[l].Activa), backgroundColor: CONFIG.colors.activa },
       { label: 'Cerradas', data: hrbpLabels.map(l => hrbpGroups[l].Cerrada), backgroundColor: CONFIG.colors.cerrada },
       { label: 'Otras', data: hrbpLabels.map(l => hrbpGroups[l].Otr), backgroundColor: CONFIG.colors.muted }
     ]
-  }, { indexAxis: 'y', scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, grid: { display: false } } } });
+  }, { indexAxis: 'y', scales: { x: { stacked: true, grid: { color: '#f1f5f9' } }, y: { stacked: true, grid: { display: false } } } });
 
   // Chart Pais
   const paisGroups = countBy(state.filteredData, 'País');
-  updateChart('pais', 'doughnut', {
+  updateChart('Pais', 'doughnut', {
     labels: Object.keys(paisGroups),
     datasets: [{ data: Object.values(paisGroups), backgroundColor: [CONFIG.colors.accent2, CONFIG.colors.standby, CONFIG.colors.accent] }]
-  }, { cutout: '70%' });
+  }, { cutout: '70%', plugins: { legend: { display: true, position: 'right' } } });
 
   // Chart Motivo
   const motivoGroups = countBy(state.filteredData, 'Motivo de Busqueda');
-  updateChart('motivo', 'pie', {
+  updateChart('Motivo', 'pie', {
     labels: Object.keys(motivoGroups),
     datasets: [{ data: Object.values(motivoGroups), backgroundColor: [CONFIG.colors.activa, CONFIG.colors.standby] }]
-  });
+  }, { plugins: { legend: { display: true, position: 'right' } } });
 
   // Chart Familia
   const famGroups = countBy(state.filteredData, 'Familia de cargo');
-  updateChart('familia', 'polarArea', {
-    labels: Object.keys(famGroups),
-    datasets: [{ data: Object.values(famGroups), backgroundColor: [
-      'rgba(0, 201, 167, 0.4)', 'rgba(13, 151, 255, 0.4)', 'rgba(247, 163, 37, 0.4)', 
-      'rgba(163, 113, 247, 0.4)', 'rgba(248, 81, 73, 0.4)', 'rgba(255, 255, 255, 0.2)'
-    ]}]
+  const sortedFam = Object.entries(famGroups).sort((a,b) => b[1] - a[1]);
+  updateChart('Familia', 'bar', {
+    labels: sortedFam.map(i => i[0]),
+    datasets: [{ 
+      label: 'Vacantes',
+      data: sortedFam.map(i => i[1]), 
+      backgroundColor: [
+        '#00c9a7', '#0d97ff', '#f7a325', '#a371f7', '#f85149', '#7d8590'
+      ]
+    }]
+  }, { 
+    indexAxis: 'y', 
+    scales: { 
+      x: { grid: { color: '#f1f5f9' } }, 
+      y: { grid: { display: false } } 
+    },
+    plugins: { legend: { display: false } }
   });
 }
 
 function updateChart(id, type, data, options = {}) {
-  const ctx = document.getElementById(`chart${id.charAt(0).toUpperCase() + id.slice(1)}`);
+  const ctx = document.getElementById(`chart${id}`);
   if (!ctx) return;
-  if (charts[id]) charts[id].destroy();
+  if (charts[id.toLowerCase()]) charts[id.toLowerCase()].destroy();
   
-  charts[id] = new Chart(ctx, {
+  charts[id.toLowerCase()] = new Chart(ctx, {
     type,
     data,
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { 
-        legend: { display: id !== 'hrbp', position: 'bottom', labels: { color: CONFIG.colors.text, boxWidth: 10, font: { size: 10 } } }
+        legend: { display: true, position: 'bottom', labels: { color: '#64748b', boxWidth: 10, font: { size: 10, weight: '600' } } }
       },
       ...options
     }
