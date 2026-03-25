@@ -1,4 +1,4 @@
-import vacanciesData from './data.js';
+// import vacanciesData from './data.js'; // REMOVED: Now using /api/data
 
 // Configuration & State
 const CONFIG = {
@@ -15,8 +15,8 @@ const CONFIG = {
 };
 
 let state = {
-  data: [...vacanciesData],
-  filteredData: [...vacanciesData],
+  data: [], // Starts empty
+  filteredData: [],
   currentPage: 1,
   sortBy: 'Fecha Inicio Búsqueda',
   sortOrder: 'desc',
@@ -42,11 +42,34 @@ let charts = {
 
 // ─── INITIALIZATION ───
 document.addEventListener('DOMContentLoaded', () => {
-  initFilters();
-  applyFilters();
-  initEventListeners();
-  updateLastUpdate();
+  fetchData();
 });
+
+async function fetchData() {
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) throw new Error('Failed to fetch data from API');
+    
+    const payload = await response.json();
+    state.data = payload.rows || [];
+    state.filteredData = [...state.data];
+    
+    // Continue initialization
+    initFilters();
+    applyFilters();
+    initEventListeners();
+    updateLastUpdate();
+    
+    if (payload.updatedAt) {
+      const date = new Date(payload.updatedAt);
+      document.getElementById('last-update').textContent = `Actualizado (Sharepoint): ${date.toLocaleDateString()} ${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    // Fallback or error message
+    document.getElementById('table-body').innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⚠️</div><p>No se pudo cargar la data de Sharepoint. Verifica la configuración.</p></div></td></tr>`;
+  }
+}
 
 function updateLastUpdate() {
   const now = new Date();
@@ -56,7 +79,7 @@ function updateLastUpdate() {
 
 function initFilters() {
   // Populate HRBP filter dynamically
-  const hrbps = [...new Set(vacanciesData.map(v => v.HRBP))].filter(Boolean).sort();
+  const hrbps = [...new Set(state.data.map(v => v.HRBP))].filter(Boolean).sort();
   const fHrbp = document.getElementById('f-hrbp');
   const mHrbp = document.getElementById('m-hrbp');
   
