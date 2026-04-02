@@ -47,10 +47,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid payload. Expected { "rows": [...] }' });
   }
 
+  // Detect dynamic "Status [fecha]" column (e.g. "Status 23 marzo", "Status 15 abril")
+  const firstRow = rows[0] || {};
+  const statusColumnName = Object.keys(firstRow).find(k => k.startsWith('Status ')) || null;
+
   const payload = {
     rows,
     updatedAt: new Date().toISOString(),
     count: rows.length,
+    statusColumnName, // e.g. "Status 23 marzo" — null if not found
   };
 
   try {

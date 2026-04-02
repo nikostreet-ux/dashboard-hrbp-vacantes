@@ -29,7 +29,8 @@ let state = {
     familia: '',
     equipo: ''
   },
-  activeTab: 'all'
+  activeTab: 'all',
+  statusColumnName: '' // Dynamic: e.g. "Status 23 marzo"
 };
 
 // Charts instances
@@ -51,9 +52,21 @@ async function fetchData() {
     if (!response.ok) throw new Error('Failed to fetch data from API');
     
     const payload = await response.json();
-    state.data = payload.rows || [];
+    // Normalize data: parse TTF as number, keep rest as-is
+    state.data = (payload.rows || []).map(row => ({
+      ...row,
+      TTF: parseInt(row.TTF) || 0
+    }));
     state.filteredData = [...state.data];
-    
+    state.statusColumnName = payload.statusColumnName || '';
+
+    // Update the Status column header dynamically
+    const thStatus = document.getElementById('th-status');
+    if (thStatus && state.statusColumnName) {
+      thStatus.innerHTML = `${state.statusColumnName} <span class="sort-icon">↕</span>`;
+      thStatus.setAttribute('data-sort', state.statusColumnName);
+    }
+
     // Continue initialization
     initFilters();
     applyFilters();
@@ -67,7 +80,7 @@ async function fetchData() {
   } catch (error) {
     console.error('Error fetching data:', error);
     // Fallback or error message
-    document.getElementById('table-body').innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">⚠️</div><p>No se pudo cargar la data de Sharepoint. Verifica la configuración.</p></div></td></tr>`;
+    document.getElementById('table-body').innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">⚠️</div><p>No se pudo cargar la data de Sharepoint. Verifica la configuración.</p></div></td></tr>`;
   }
 }
 
@@ -167,7 +180,7 @@ function applyFilters() {
   state.filteredData = state.data.filter(v => {
     const matchesSearch = !state.filters.search || 
       (v.Cargo && v.Cargo.toLowerCase().includes(state.filters.search.toLowerCase())) ||
-      (v.Gerencia && v.Gerencia.toLowerCase().includes(state.filters.search.toLowerCase())) ||
+      (v['Gerencia Madre'] && v['Gerencia Madre'].toLowerCase().includes(state.filters.search.toLowerCase())) ||
       (v.HRBP && v.HRBP.toLowerCase().includes(state.filters.search.toLowerCase()));
     
     const matchesHrbp = !state.filters.hrbp || v.HRBP === state.filters.hrbp;
@@ -354,6 +367,17 @@ function countBy(arr, key) {
   }, {});
 }
 
+// Converts ISO date strings ("2026-03-24T00:00:00.000Z") to "DD-MM-AAAA"
+function formatDate(dateStr) {
+  if (!dateStr || dateStr === '—') return '—';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr; // return as-is if unparseable
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const year = d.getUTCFullYear();
+  return `${day}-${month}-${year}`;
+}
+
 function renderTable() {
   const tbody = document.getElementById('table-body');
   tbody.innerHTML = '';
@@ -362,23 +386,25 @@ function renderTable() {
   const pageData = state.filteredData.slice(start, start + CONFIG.itemsPerPage);
 
   if (pageData.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📂</div><p>No se encontraron vacantes con los filtros aplicados</p></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">📂</div><p>No se encontraron vacantes con los filtros aplicados</p></div></td></tr>`;
     updatePagination(0);
     return;
   }
 
   pageData.forEach(v => {
     const tr = document.createElement('tr');
+    const statusVal = state.statusColumnName ? (v[state.statusColumnName] || '—') : '—';
     tr.innerHTML = `
-      <td>${v.HRBP}</td>
-      <td><span class="country-flag">${getFlag(v.País)}</span> ${v.País}</td>
-      <td class="truncate" title="${v.Cargo}">${v.Cargo}</td>
-      <td class="truncate" title="${v.Gerencia}">${v.Gerencia}</td>
-      <td><span class="badge badge-${v.Estado.toLowerCase().replace(' ', '')}"><span class="badge-dot"></span>${v.Estado}</span></td>
-      <td><small>${v["Motivo de Busqueda"]}</small></td>
-      <td><small>${v["Familia de cargo"]}</small></td>
-      <td><span class="ttf-pill ${getTTFClass(v.TTF)}">${v.TTF}d</span></td>
-      <td>${v["Fecha Inicio Búsqueda"]}</td>
+      <td>${v.HRBP || '—'}</td>
+      <td><span class="country-flag">${getFlag(v.País)}</span> ${v.País || '—'}</td>
+      <td class="truncate" title="${v.Cargo || ''}">${v.Cargo || '—'}</td>
+      <td class="truncate" title="${v['Gerencia Madre'] || ''}">${v['Gerencia Madre'] || '—'}</td>
+      <td><span class="badge badge-${(v.Estado || '').toLowerCase().replace(' ', '')}"><span class="badge-dot"></span>${v.Estado || '—'}</span></td>
+      <td><small>${statusVal}</small></td>
+      <td><small>${v["Motivo de Busqueda"] || '—'}</small></td>
+      <td><small>${v["Familia de cargo"] || '—'}</small></td>
+      <td><span class="ttf-pill ${getTTFClass(v.TTF)}">${v.TTF || 0}d</span></td>
+      <td>${formatDate(v["Fecha Inicio Búsqueda"])}</td>
       <td class="row-actions">
         <button class="icon-btn btn-view" title="Ver detalle">👁</button>
         <button class="icon-btn" title="Editar">✎</button>
@@ -482,22 +508,38 @@ function showDetail(v) {
   
   title.textContent = v.Cargo;
   
+  const statusLabel = state.statusColumnName || 'Status';
+  const statusValue = state.statusColumnName ? (v[state.statusColumnName] || '—') : '—';
+
   content.innerHTML = `
     <div class="detail-section">
       <h5>Información General</h5>
-      <div class="detail-row"><span class="detail-key">Estado</span><span class="detail-val"><span class="badge badge-${v.Estado.toLowerCase().replace(' ', '')}">${v.Estado}</span></span></div>
-      <div class="detail-row"><span class="detail-key">Gerencia</span><span class="detail-val">${v.Gerencia}</span></div>
-      <div class="detail-row"><span class="detail-key">HRBP</span><span class="detail-val">${v.HRBP}</span></div>
-      <div class="detail-row"><span class="detail-key">Líder</span><span class="detail-val">${v.Líder}</span></div>
-      <div class="detail-row"><span class="detail-key">País</span><span class="detail-val">${v.País}</span></div>
+      <div class="detail-row"><span class="detail-key">Estado</span><span class="detail-val"><span class="badge badge-${(v.Estado || '').toLowerCase().replace(' ', '')}">${v.Estado || '—'}</span></span></div>
+      <div class="detail-row"><span class="detail-key">${statusLabel}</span><span class="detail-val"><b>${statusValue}</b></span></div>
+      <div class="detail-row"><span class="detail-key">Gerencia Madre</span><span class="detail-val">${v['Gerencia Madre'] || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">HRBP</span><span class="detail-val">${v.HRBP || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Líder</span><span class="detail-val">${v.Líder || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">País</span><span class="detail-val">${v.País || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">¿A quién reemplaza?</span><span class="detail-val">${v['¿A quién reemplaza?'] || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Motivo</span><span class="detail-val">${v['Motivo de Busqueda'] || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Familia de Cargo</span><span class="detail-val">${v['Familia de cargo'] || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Banda</span><span class="detail-val">${v.Banda || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Tipo de Movimiento</span><span class="detail-val">${v['Tipo de Movimiento'] || '—'}</span></div>
     </div>
     <div class="detail-section">
       <h5>Proceso TA</h5>
-      <div class="detail-row"><span class="detail-key">Coordinador</span><span class="detail-val">${v["Coordinador TA Responsable"]}</span></div>
-      <div class="detail-row"><span class="detail-key">Equipo</span><span class="detail-val">${v["Equipo TA"]}</span></div>
-      <div class="detail-row"><span class="detail-key">TTF Acumulado</span><span class="detail-val"><b>${v.TTF} días</b></span></div>
-      <div class="detail-row"><span class="detail-key">Inicio</span><span class="detail-val">${v["Fecha Inicio Búsqueda"]}</span></div>
-      <div class="detail-row"><span class="detail-key">Forecast</span><span class="detail-val">${v.Forecast}</span></div>
+      <div class="detail-row"><span class="detail-key">Coordinador</span><span class="detail-val">${v['Coordinador TA Responsable'] || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Equipo</span><span class="detail-val">${v['Equipo TA'] || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">TTF Acumulado</span><span class="detail-val"><b>${v.TTF || 0} días</b></span></div>
+      <div class="detail-row"><span class="detail-key">Forecast</span><span class="detail-val">${v.Forecast || '—'}</span></div>
+      <div class="detail-row"><span class="detail-key">Nombre Candidato</span><span class="detail-val">${v['Nombre candidato seleccionado'] || '—'}</span></div>
+    </div>
+    <div class="detail-section">
+      <h5>Fechas</h5>
+      <div class="detail-row"><span class="detail-key">Inicio Búsqueda</span><span class="detail-val">${formatDate(v['Fecha Inicio Búsqueda'])}</span></div>
+      <div class="detail-row"><span class="detail-key">Fecha Ingreso</span><span class="detail-val">${formatDate(v['Fecha Ingreso'])}</span></div>
+      <div class="detail-row"><span class="detail-key">Fecha Cubierta</span><span class="detail-val">${formatDate(v['Fecha Cubierta Búsqueda'])}</span></div>
+      <div class="detail-row"><span class="detail-key">Ceco</span><span class="detail-val">${v.Ceco || '—'}</span></div>
     </div>
     <div class="detail-section">
       <h5>Observaciones</h5>

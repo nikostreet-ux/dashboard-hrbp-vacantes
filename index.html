@@ -182,8 +182,9 @@
               <th data-sort="HRBP">HRBP <span class="sort-icon">↕</span></th>
               <th data-sort="País">País <span class="sort-icon">↕</span></th>
               <th data-sort="Cargo">Cargo <span class="sort-icon">↕</span></th>
-              <th data-sort="Gerencia">Gerencia <span class="sort-icon">↕</span></th>
+              <th data-sort="Gerencia Madre">Gerencia Madre <span class="sort-icon">↕</span></th>
               <th data-sort="Estado">Estado <span class="sort-icon">↕</span></th>
+              <th id="th-status" data-sort="">Status <span class="sort-icon">↕</span></th>
               <th data-sort="Motivo de Busqueda">Motivo <span class="sort-icon">↕</span></th>
               <th data-sort="Familia de cargo">Familia <span class="sort-icon">↕</span></th>
               <th data-sort="TTF">TTF <span class="sort-icon">↕</span></th>
@@ -231,7 +232,7 @@
           <input type="text" id="m-cargo" placeholder="Ej: Analista de Marketing">
         </div>
         <div class="form-group full">
-          <label>Gerencia</label>
+          <label>Gerencia Madre</label>
           <input type="text" id="m-gerencia" placeholder="Ej: Gerencia Comercial Chile">
         </div>
         <div class="form-group">
@@ -302,6 +303,30 @@
             <option>No</option>
             <option>Pendiente</option>
           </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha Ingreso</label>
+          <input type="date" id="m-fecha-ingreso">
+        </div>
+        <div class="form-group">
+          <label>Fecha Cubierta Búsqueda</label>
+          <input type="date" id="m-fecha-cubierta">
+        </div>
+        <div class="form-group">
+          <label>Tipo de Movimiento</label>
+          <input type="text" id="m-tipo" placeholder="Interno / Externo">
+        </div>
+        <div class="form-group">
+          <label>Banda</label>
+          <input type="text" id="m-banda" placeholder="Ej: B4">
+        </div>
+        <div class="form-group">
+          <label>Ceco</label>
+          <input type="text" id="m-ceco" placeholder="">
+        </div>
+        <div class="form-group full">
+          <label>Nombre Candidato Seleccionado</label>
+          <input type="text" id="m-candidato" placeholder="">
         </div>
         <div class="form-group full">
           <label>Comentarios</label>
