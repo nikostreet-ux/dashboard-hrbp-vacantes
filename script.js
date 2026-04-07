@@ -107,11 +107,13 @@ function initFilters() {
   // Populate Gerencia filter dynamically
   const gerencias = [...new Set(state.data.map(v => v['Gerencia Madre']))].filter(Boolean).sort();
   const fGerencia = document.getElementById('f-gerencia');
+  const mGerencia = document.getElementById('m-gerencia');
   
   gerencias.forEach(g => {
     const opt = document.createElement('option');
     opt.value = opt.textContent = g;
-    if (fGerencia) fGerencia.appendChild(opt);
+    if (fGerencia) fGerencia.appendChild(opt.cloneNode(true));
+    if (mGerencia) mGerencia.appendChild(opt);
   });
 }
 

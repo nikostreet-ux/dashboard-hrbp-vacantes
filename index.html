@@ -220,10 +220,17 @@
     </div>
     <div class="modal-body">
       <div class="form-grid">
+
+        <!-- Fila 1: HRBP + País -->
         <div class="form-group">
           <label>HRBP *</label>
           <select id="m-hrbp">
             <option value="">Seleccionar…</option>
+            <option>Laura Camargo</option>
+            <option>Maria Jose Carrizo</option>
+            <option>Patricia Bustamante</option>
+            <option>Seba Soto</option>
+            <option>Otro</option>
           </select>
         </div>
         <div class="form-group">
@@ -235,40 +242,51 @@
             <option>Colombia</option>
           </select>
         </div>
-        <div class="form-group full">
-          <label>Cargo *</label>
-          <input type="text" id="m-cargo" placeholder="Ej: Analista de Marketing">
-        </div>
-        <div class="form-group full">
-          <label>Gerencia Madre</label>
-          <input type="text" id="m-gerencia" placeholder="Ej: Gerencia Comercial Chile">
+
+        <!-- Fila 2: Coordinador TA + Equipo TA -->
+        <div class="form-group">
+          <label>Coordinador TA Responsable</label>
+          <input type="text" id="m-coord" placeholder="Nombre del coordinador">
         </div>
         <div class="form-group">
-          <label>Líder</label>
-          <input type="text" id="m-lider" placeholder="Nombre del líder">
-        </div>
-        <div class="form-group">
-          <label>Coordinador TA</label>
-          <input type="text" id="m-coord" placeholder="Responsable TA">
-        </div>
-        <div class="form-group">
-          <label>Estado *</label>
-          <select id="m-estado">
+          <label>Equipo TA</label>
+          <select id="m-equipo">
             <option value="">Seleccionar…</option>
-            <option>Activa</option>
-            <option>Cerrada</option>
-            <option>Cancelada</option>
-            <option>Stand By</option>
+            <option>OVH</option>
+            <option>Ejecutivo</option>
+            <option>Operaciones</option>
           </select>
         </div>
+
+        <!-- Fila 3: Gerencia Madre (ancho completo, dinámica desde datos) -->
+        <div class="form-group full">
+          <label>Gerencia Madre</label>
+          <select id="m-gerencia">
+            <option value="">Seleccionar…</option>
+          </select>
+        </div>
+
+        <!-- Fila 4: Motivo + Líder -->
         <div class="form-group">
-          <label>Motivo</label>
+          <label>Motivo de Búsqueda</label>
           <select id="m-motivo">
             <option value="">Seleccionar…</option>
             <option>Reemplazo</option>
             <option>Nuevo HC</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Líder</label>
+          <input type="text" id="m-lider" placeholder="Nombre del líder directo">
+        </div>
+
+        <!-- Fila 5: Cargo (ancho completo) -->
+        <div class="form-group full">
+          <label>Cargo *</label>
+          <input type="text" id="m-cargo" placeholder="Ej: Analista de Marketing">
+        </div>
+
+        <!-- Fila 6: Familia de Cargo + ¿A quién reemplaza? -->
         <div class="form-group">
           <label>Familia de Cargo</label>
           <select id="m-familia">
@@ -283,25 +301,66 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Equipo TA</label>
-          <select id="m-equipo">
-            <option value="">Seleccionar…</option>
-            <option>OVH</option>
-            <option>Ejecutivo</option>
-            <option>Operaciones</option>
-          </select>
+          <label>¿A quién reemplaza?</label>
+          <input type="text" id="m-reemplaza" placeholder="Nombre de la persona">
         </div>
+
+        <!-- Fila 7: Estado + TTF -->
         <div class="form-group">
-          <label>Fecha Inicio Búsqueda</label>
-          <input type="date" id="m-fecha">
+          <label>Estado *</label>
+          <select id="m-estado">
+            <option value="">Seleccionar…</option>
+            <option>Activa</option>
+            <option>Cerrada</option>
+            <option>Cancelada</option>
+            <option>Stand By</option>
+          </select>
         </div>
         <div class="form-group">
           <label>TTF (días)</label>
           <input type="number" id="m-ttf" placeholder="0" min="0">
         </div>
+
+        <!-- Fila 8: Comentarios (ancho completo) -->
+        <div class="form-group full">
+          <label>Comentarios</label>
+          <textarea id="m-comentarios" placeholder="Novedades, estado del proceso…"></textarea>
+        </div>
+
+        <!-- Fila 9: Candidato (ancho completo) -->
+        <div class="form-group full">
+          <label>Nombre Candidato Seleccionado</label>
+          <input type="text" id="m-candidato" placeholder="">
+        </div>
+
+        <!-- Fila 10: Tipo de Movimiento + Fecha Ingreso -->
         <div class="form-group">
-          <label>¿A quién reemplaza?</label>
-          <input type="text" id="m-reemplaza" placeholder="">
+          <label>Tipo de Movimiento</label>
+          <select id="m-tipo">
+            <option value="">Seleccionar…</option>
+            <option>Interno</option>
+            <option>Externo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fecha Ingreso</label>
+          <input type="date" id="m-fecha-ingreso">
+        </div>
+
+        <!-- Fila 11: Fecha Inicio + Fecha Cubierta -->
+        <div class="form-group">
+          <label>Fecha Inicio Búsqueda</label>
+          <input type="date" id="m-fecha">
+        </div>
+        <div class="form-group">
+          <label>Fecha Cubierta Búsqueda</label>
+          <input type="date" id="m-fecha-cubierta">
+        </div>
+
+        <!-- Fila 12: Ceco + Forecast + Banda -->
+        <div class="form-group">
+          <label>Ceco</label>
+          <input type="text" id="m-ceco" placeholder="">
         </div>
         <div class="form-group">
           <label>Forecast</label>
@@ -313,33 +372,10 @@
           </select>
         </div>
         <div class="form-group">
-          <label>Fecha Ingreso</label>
-          <input type="date" id="m-fecha-ingreso">
-        </div>
-        <div class="form-group">
-          <label>Fecha Cubierta Búsqueda</label>
-          <input type="date" id="m-fecha-cubierta">
-        </div>
-        <div class="form-group">
-          <label>Tipo de Movimiento</label>
-          <input type="text" id="m-tipo" placeholder="Interno / Externo">
-        </div>
-        <div class="form-group">
           <label>Banda</label>
           <input type="text" id="m-banda" placeholder="Ej: B4">
         </div>
-        <div class="form-group">
-          <label>Ceco</label>
-          <input type="text" id="m-ceco" placeholder="">
-        </div>
-        <div class="form-group full">
-          <label>Nombre Candidato Seleccionado</label>
-          <input type="text" id="m-candidato" placeholder="">
-        </div>
-        <div class="form-group full">
-          <label>Comentarios</label>
-          <textarea id="m-comentarios" placeholder="Novedades, estado del proceso…"></textarea>
-        </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn btn-ghost btn-small" id="btn-cancel-modal">Cancelar</button>
