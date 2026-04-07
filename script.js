@@ -627,9 +627,34 @@ function submitNewVacante() {
     return;
   }
 
-  console.log("PAYLOAD LISTO PARA ENVIAR AL BACKEND (Power Automate):", payload);
-  alert("Simulación de envío completada. Revisa la consola para ver los datos capturados.\nUna vez configures Power Automate, los datos se enviarán hacia Excel.");
-  
-  document.getElementById('modal-overlay').classList.remove('open');
+  const btn = document.getElementById('btn-save-vacante');
+  const originalText = btn.textContent;
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+
+  fetch('https://default18a34a11d69c4d9bb0d8b0c63251aa.7f.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1c316b9002414804a9e69aaeb52db388/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_8JaHHJdieXt2Zv4XFdfVv1EXfhph7A6RJNrY8UiX1c', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(res => {
+    if (!res.ok) throw new Error("Error en la respuesta del servidor");
+    alert("¡Vacante guardada con éxito en Excel!");
+    document.getElementById('modal-overlay').classList.remove('open');
+    
+    // Limpiar todos los campos del modal después de un éxito
+    document.querySelectorAll('.modal-body input, .modal-body select, .modal-body textarea').forEach(el => {
+      if (el.tagName === 'SELECT') {
+        el.selectedIndex = 0;
+      } else {
+        el.value = '';
+      }
+    });
+  }).catch(err => {
+    console.error("Error al guardar vacante:", err);
+    alert("Hubo un error al intentar comunicar con Excel (Power Automate). Revisa la consola.");
+  }).finally(() => {
+    btn.textContent = originalText;
+    btn.disabled = false;
+  });
 }
 
