@@ -54,10 +54,22 @@ async function fetchData() {
     
     const payload = await response.json();
     // Normalize data: parse TTF as number, keep rest as-is
-    state.data = (payload.rows || []).map(row => ({
-      ...row,
-      TTF: parseInt(row.TTF) || 0
-    }));
+    state.data = (payload.rows || []).map(row => {
+      let hrbp = row.HRBP ? row.HRBP.trim() : '';
+      
+      // Unify HRBP names to match the exact ones and avoid duplicates
+      const hrbpLower = hrbp.toLowerCase();
+      if (hrbpLower === 'patricia') hrbp = 'Patricia Bustamante';
+      if (hrbpLower === 'laura') hrbp = 'Laura Camargo';
+      if (hrbpLower === 'maria jose' || hrbpLower === 'maría josé') hrbp = 'Maria Jose Carrizo';
+      if (hrbpLower === 'sebastian' || hrbpLower === 'seba' || hrbpLower === 'sebastián') hrbp = 'Seba Soto';
+
+      return {
+        ...row,
+        HRBP: hrbp,
+        TTF: parseInt(row.TTF) || 0
+      };
+    });
     state.filteredData = [...state.data];
     state.statusColumnName = payload.statusColumnName || '';
 
