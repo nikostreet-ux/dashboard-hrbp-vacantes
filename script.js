@@ -23,6 +23,7 @@ let state = {
   filters: {
     search: '',
     hrbp: '',
+    gerencia: '',
     pais: '',
     estado: '',
     motivo: '',
@@ -102,11 +103,21 @@ function initFilters() {
     fHrbp.appendChild(opt.cloneNode(true));
     mHrbp.appendChild(opt);
   });
+
+  // Populate Gerencia filter dynamically
+  const gerencias = [...new Set(state.data.map(v => v['Gerencia Madre']))].filter(Boolean).sort();
+  const fGerencia = document.getElementById('f-gerencia');
+  
+  gerencias.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = opt.textContent = g;
+    if (fGerencia) fGerencia.appendChild(opt);
+  });
 }
 
 function initEventListeners() {
   // Filter inputs
-  const filterIds = ['search', 'f-hrbp', 'f-pais', 'f-estado', 'f-motivo', 'f-familia', 'f-equipo'];
+  const filterIds = ['search', 'f-hrbp', 'f-gerencia', 'f-pais', 'f-estado', 'f-motivo', 'f-familia', 'f-equipo'];
   filterIds.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -172,6 +183,11 @@ function initEventListeners() {
 
   // Export
   document.getElementById('btn-export').addEventListener('click', exportToCSV);
+  const btnPdf = document.getElementById('btn-pdf');
+  if (btnPdf) btnPdf.addEventListener('click', exportToPDF);
+
+  // Save new vacante
+  document.getElementById('btn-save-vacante').addEventListener('click', submitNewVacante);
 }
 
 // ─── CORE LOGIC ───
@@ -184,6 +200,7 @@ function applyFilters() {
       (v.HRBP && v.HRBP.toLowerCase().includes(state.filters.search.toLowerCase()));
     
     const matchesHrbp = !state.filters.hrbp || v.HRBP === state.filters.hrbp;
+    const matchesGerencia = !state.filters.gerencia || v['Gerencia Madre'] === state.filters.gerencia;
     const matchesPais = !state.filters.pais || v.País === state.filters.pais;
     const matchesEstado = !state.filters.estado || v.Estado === state.filters.estado;
     const matchesMotivo = !state.filters.motivo || v["Motivo de Busqueda"] === state.filters.motivo;
@@ -195,7 +212,7 @@ function applyFilters() {
     if (state.activeTab === 'activa') matchesTab = v.Estado === 'Activa';
     else if (state.activeTab === 'cerrada') matchesTab = v.Estado === 'Cerrada';
 
-    return matchesSearch && matchesHrbp && matchesPais && matchesEstado && 
+    return matchesSearch && matchesHrbp && matchesGerencia && matchesPais && matchesEstado && 
            matchesMotivo && matchesFamilia && matchesEquipo && matchesTab;
   });
 
@@ -566,3 +583,53 @@ function exportToCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
+function exportToPDF() {
+  const element = document.querySelector('.main');
+  const opt = {
+    margin:       0.2,
+    filename:     `vacantes_mallplaza_${new Date().toISOString().split('T')[0]}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'in', format: 'a3', orientation: 'landscape' }
+  };
+  
+  html2pdf().set(opt).from(element).save();
+}
+
+function submitNewVacante() {
+  const payload = {
+    "HRBP": document.getElementById('m-hrbp').value,
+    "País": document.getElementById('m-pais').value,
+    "Cargo": document.getElementById('m-cargo').value,
+    "Gerencia Madre": document.getElementById('m-gerencia').value,
+    "Líder": document.getElementById('m-lider').value,
+    "Coordinador TA Responsable": document.getElementById('m-coord').value,
+    "Estado": document.getElementById('m-estado').value,
+    "Motivo de Busqueda": document.getElementById('m-motivo').value,
+    "Familia de cargo": document.getElementById('m-familia').value,
+    "Equipo TA": document.getElementById('m-equipo').value,
+    "Fecha Inicio Búsqueda": document.getElementById('m-fecha').value,
+    "TTF": document.getElementById('m-ttf').value,
+    "¿A quién reemplaza?": document.getElementById('m-reemplaza').value,
+    "Forecast": document.getElementById('m-forecast').value,
+    "Fecha Ingreso": document.getElementById('m-fecha-ingreso').value,
+    "Fecha Cubierta Búsqueda": document.getElementById('m-fecha-cubierta').value,
+    "Tipo de Movimiento": document.getElementById('m-tipo').value,
+    "Banda": document.getElementById('m-banda').value,
+    "Ceco": document.getElementById('m-ceco').value,
+    "Nombre candidato seleccionado": document.getElementById('m-candidato').value,
+    "Comentarios": document.getElementById('m-comentarios').value
+  };
+  
+  if (!payload["HRBP"] || !payload["País"] || !payload["Cargo"] || !payload["Estado"]) {
+    alert('Por favor complete todos los campos obligatorios (*)');
+    return;
+  }
+
+  console.log("PAYLOAD LISTO PARA ENVIAR AL BACKEND (Power Automate):", payload);
+  alert("Simulación de envío completada. Revisa la consola para ver los datos capturados.\nUna vez configures Power Automate, los datos se enviarán hacia Excel.");
+  
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
