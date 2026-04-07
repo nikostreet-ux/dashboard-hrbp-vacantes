@@ -92,16 +92,14 @@ function updateLastUpdate() {
 }
 
 function initFilters() {
-  // Populate HRBP filter dynamically
+  // Populate HRBP sidebar filter dynamically from data
   const hrbps = [...new Set(state.data.map(v => v.HRBP))].filter(Boolean).sort();
   const fHrbp = document.getElementById('f-hrbp');
-  const mHrbp = document.getElementById('m-hrbp');
   
   hrbps.forEach(h => {
     const opt = document.createElement('option');
     opt.value = opt.textContent = h;
-    fHrbp.appendChild(opt.cloneNode(true));
-    mHrbp.appendChild(opt);
+    if (fHrbp) fHrbp.appendChild(opt);
   });
 
   // Populate Gerencia filter dynamically
