@@ -63,6 +63,7 @@ async function fetchData() {
       if (hrbpLower === 'laura') hrbp = 'Laura Camargo';
       if (hrbpLower === 'maria jose' || hrbpLower === 'maría josé') hrbp = 'Maria Jose Carrizo';
       if (hrbpLower === 'sebastian' || hrbpLower === 'seba' || hrbpLower === 'sebastián') hrbp = 'Seba Soto';
+      if (hrbpLower === 'andrea') hrbp = 'Andrea Pizarro';
 
       return {
         ...row,
